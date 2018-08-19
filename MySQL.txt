@@ -1,0 +1,465 @@
+端口：3306
+
+字符        Character  a b c d
+字符集合    CharSet   一组字符  
+           ASCII字符集合  扩展ASCII字符集合 拉丁语系
+           GB2312  BIG5   Unicode字符集合
+
+ASCII表 American Standard Code for Information Interchange
+
+127个字符
+
+控制字符  打印字符  
+
+0000 0000 ---> 0111 1111
+高四位  低四位
+
+
+
+字符集合 + 编码 = 字符集
+
+存储和解码使用的字符集不是同一个，就会产生乱码
+
+
+字符编码：给字符集合中的字符指定一个数字来标识
+
+字符序：定义字符集合中字符的排序规则
+
+以_ci 大小写不敏感
+以_cs 大小写敏感
+以_bin 按编码值比较
+
+
+
+常见的字符集
+
+ASCII字符集
+
+ASCII扩展表  latin1  0000 1111  255个字符  8位二进制
+
+GB2312  BIG5 GBK             16位二进制
+
+Unicode 字符集 全球语言      16位二进制
+
+
+扩展ASCII 字符集 latin1  latin2
+Unicode  字符集   Unicode编码  1个字符2个字节
+                   UTF8   1个英文字符1个字节
+                         1个中文字符3个字节
+UTF-8最多可用到6个字节
+
+1字节  0xxxxxxx
+2字节  110xxxxx  10xxxxxx
+3字节  1110xxxx  10xxxxxx  10xxxxxx
+4字节  11110xxx  10xxxxxx  10xxxxxx  10xxxxxx
+5字节  111110xx  10xxxxxx  10xxxxxx  10xxxxxx  10xxxxxx
+6字节  1111110x  10xxxxxx  10xxxxxx  10xxxxxx  10xxxxxx  10xxxxxx
+
+
+A韩
+
+ A   0100 0001
+
+韩  Unicode  0100 1001  0100 0100
+
+韩  UTF-8    1110 0100  1010 0101  1000 0100
+
+chcp 936
+
+
+-------------------------------------------------------------
+
+create database school; [db.opt]
+show databases;
+
+use school;
+create table student(name varchar(20)); [student.frm]
+desc student;
+
+alter table student add age int;
+alter table student drop age;
+
+create table teacher(name varchar(20));  [teacher.frm]
+
+insert into student (name) values('Li Ming');
+
+insert into student (name) values('李明');{会出现乱码}
+
+drop table student;
+drop database school;
+
+在创建数据库的时候进行编码设置
+create database school character set utf8 collate utf8_general_ci;
+
+create table student(id int, name varchar(20), score int, gender char(2));
+
+insert into student (id,name,score,gender) values(1,'张三',80,'男');
+insert into student (id,name,score,gender) values(2,'李四',80,'男');
+insert into student (id,name,score,gender) values(3,'李小红',80,'女');
+
+select * from student;
+select name from student;
+select * from student where name like '李%'； {模糊查询 like '%关键字%'}
+select * from student where name like '李%' and gender='女'; {多条件查询}
+select * from student where name = '李四';
+
+select * from student order by score desc;
+select * from student order by score asc;
+
+select * from student limit 1,2; {从第一条后{即第2条}查询，显示2条数据}
+
+update student set gender='男' where id=3; {如果没有where指定条件，则全部更新}
+update student set gender='女';
+
+delete from student where id=2; {一般加入where条件进行删除，否则会把表的内容全部清空}
+delete from student;
+
+
+
+select sum(score) from student; {总分数}
+select max(score) from student; {最高分数}
+select min(score) from student; {最低分数}
+select avg(score) from student; {平均分数}
+
+select count(*) from student;
+
+select gender,sum(score) from student group by gender;
+
+select name,classname from student,class; {这样会重复}
+select name,classname from student s,class c WHERE s.bjid=c.id; {别名的使用、where条件}
+select name,classname from student s JOIN class c ON s.bjid=c.id; {join on 表连接}
+select * from student WHERE bjid IN(select id from class WHERE classname='一年级（1）班'); {嵌套查询，子查询 或者not in()   第一个查询结果作为第二个查询条件}
+
+
+主键：
+作为表的行的唯一标识的候选关键字。
+一张表只有一个主键。主键可以由一个字段，或者多个字段组成。
+主键的值不能重复，也不可以为空。null
+
+其实，主键也是一种约束，一种索引。当建立了索引，在复杂的多数据查询中，提高查询速度。
+
+没有设置逐渐的时候可以插入重复数据
+
+alter table student add constraint pk_student primary key(id); {设置主键}
+
+desc student; {查看表的结构}
+
+alter table student drop primary key; {删除主键}
+
+
+一般情况，在创建表的时候，就会设置主键
+{在初始化表的时候，建立一个自动增长的id作为主键，常见做法}
+create table student(
+	id int(20) auto_increment not null primary key,
+	name varchar(50),
+	score int,
+	gender char(2),
+	bjid int);
+
+一次插入多条数据
+insert into student(name,score,gender,bjid) values('张三',30,'男',3),('李四',60,'男',2),('张五',80,'男',1)；
+
+
+删除自增长的主键id，要注意的问题：
+
+1.先要删除自增长
+alter table student change id id int(20);
+
+2.然后才能删除主键
+alter table student drop primary key;
+
+
+
+外键，数据参照的完整性，也是一种约束
+一张表的外键必须是另一张表的主键。 {前提}
+{一般情况，外键放在最后面}
+
+alter table class add constraint pk_class primary key(id); {前提，创建主键}
+
+alter table student add constraint fk_student foreign key(bjid) references class(id);
+
+创建外键后，在学生表添加数据的bjid 必须要参考班级表的主键id
+
+
+delete from class where id=3; {由于外键约束，不能直接删除。在学生表中有引用}
+
+删除外键
+alter table student drop foreign key fk_student;
+
+
+check 约束
+alter table student add constraint ck_student check(gender='男' or gender='女');
+alter table student add constraint ck_student check(gender in('男','女'));
+
+
+not null 非空
+alter table student change name name varchar(50) not null;
+alter table student change gender gender char(2) default '男' not null;
+
+insert into student(name,score,bjid) values('',90,3); {姓名是空格，而不是null；默认性别：男}
+
+
+show create table student; {显示创建表的信息}
+
+
+----------------------------------------------------------
+
+索引index（快速查询） 视图view（安全，方便查找）
+
+create table class(
+	id int(20) not null primary key,
+	classname varchar(50) not null);
+
+create table student(
+	id int(20) auto_increment not null primary key,
+	name varchar(50) not null,
+	literature int,
+	math int,
+	bj_id int not null,
+	CONSTRAINT fk_student foreign key(bj_id) references class(id));
+
+
+
+视图：一个逻辑表，并不存储在物理硬盘上，方便查询。
+
+select name, literature+math from student; {查询姓名和总分}
+
+创建视图
+create view v_student as select name, literature+math from student;
+
+
+访问视图 {不能插入、删除、更新数据}
+select * from v_student; 
+
+
+修改视图
+alter view v_student as select name as 姓名, literature+math as 总分 from student;
+
+
+删除视图
+drop view v_student;
+
+
+查询两张表
+select name,classname from student s,class c where s.bj_id=c.id;
+
+建立一个视图方便以后查询
+create view v_student as
+select name,classname from student s,class c where s.bj_id=c.id;
+
+select * from v_student;
+
+show tables; {显示表和视图}
+
+----------------------------------------------------------------------------
+
+索引  index
+
+用来快速查找具有特定值的记录，如果没有索引，执行查询时候必须从第一条记录开始扫描整个表的记录，直到符合要求的记录。
+
+如果有了索引，mysql无需扫描任何记录，即可顺序找到目标记录的位置。
+
+
+索引---->提高查找数据速度，数据量越大，效果越明显
+
+创建索引
+create index idx_name on student(name);
+
+创建唯一索引（主键是一种唯一索引）
+create unique index idx_name on student(name);
+
+删除索引
+drop index idx_name on student;
+
+
+另外一种创建和删除方式
+alter table student add index idx_name(name);
+alter table student add unique idx_name(name);
+alter table student drop index idx_name;
+
+
+--------------------------------------------------------------
+
+存储过程procedure  存储函数function
+
+
+
+创建存储过程
+
+delimiter // {双斜杠代表结束}  
+
+create procedure simpleproc(out param1 int)
+begin 
+	select sum(literature) into param1 from student;
+end
+//
+
+delimiter ;
+
+
+调用存储过程
+call simpleproc(@a);
+select @a;
+
+
+带输入，输出参数的存储过程
+drop procedure if exists simpleproc;
+
+
+delimiter //
+
+create procedure simpleproc(IN id int, OUT result1 varchar(100))
+begin
+	select name into result1 from student where student.id=id;
+end
+//
+
+delimiter ;
+
+call simpleproc(5, @a);
+select @a;
+
+
+
+-------------------------------------
+
+存储函数里声明变量和赋值，逻辑判断
+drop procedure if exists simpleproc;
+
+delimiter //
+
+create procedure simpleproc(IN in_name varchar(50), OUT result_1 varchar(150))
+begin
+	declare temp_1 int;
+	declare temp_2 int default 60;
+
+	select (literature+math)/2 into temp_1 from student where name=in_name;
+
+	if temp_1 >= temp_2 then
+		set result_1 = '及格';
+	else
+		set result_1 = '不及格';
+	end if;
+
+end
+//
+
+delimiter ;
+
+call simpleproc('张三',@a);
+select @a;
+
+
+
+-----------------------------------------------------------
+
+存储函数
+
+delimiter //
+
+create function hello(s char(20)) returns int
+deterministic
+begin
+	declare temp_sum int;
+	select literature+math into temp_sum from student where name=s;
+	return temp_sum;
+end
+//
+
+delimiter ;
+select hello('张三');
+
+-------------------------------------------------------------
+
+--存储过程 使用IN传入参数，使用OUT参数返回值。
+
+--存储函数 直接写参数进行传入，使用return返回值。
+
+--在调用方面也有区别：
+	call 存储过程名称； select @a
+	select 存储函数名称
+
+
+----------------------------------------------------------------
+
+事务 transaction   锁定lock
+
+事务的出现，考虑这个例子：
+张三账户转账100元到李四的账户，
+1.张三账户减去100元
+2.李四账户增加100元
+
+
+默认自动提交 select @@autocommit; {1}
+
+set @@autocommit=0; {数据只在内存中}
+
+start transaction;
+update account set amount=0 where name=''张三;
+rollback; {回滚}
+commit;
+
+---------------------------------------------------
+回滚到自定义点
+start transaction;
+update account set amount=0 where name='张三';
+update account set amount=200 where name='李四';
+savepoint s1;
+
+update account set amount=250 where name='李四';
+rollback to s1;
+commit;
+
+------------------------------------------------
+
+数据库有一个特性，允许多用户访问，就会出现并发性。
+eg: 网上购物系统，只剩下一本书，张三和李四同时购买这本书。
+	有可能他们都会买到这本书，但是不符合现实。
+	这样，我们通过锁来实现（read, write）
+
+lock tables account read;
+
+select * from account;
+
+由于对账户表进行了读权限锁定，所以更新失败。
+update account set amount=1000 where name='张三';
+会发生错误。
+
+
+unlock tables; {解锁}
+
+update account set amount=1000 where name='张三';
+
+
+
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

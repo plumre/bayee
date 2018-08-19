@@ -1,0 +1,779 @@
+r-- w-- x--
+u   g   o
+
+目录处理命令
+mkdir -p
+cp -r
+mv
+rm -r -f
+
+
+4.1 文件处理命令
+touch
+cat -n
+tac
+more (空格翻页、回车换行、q退出)
+less (向上翻页PageUp、换行↑、搜索/n[next])
+head -n 7
+tail -n 7, -f
+
+链接命令
+ln -s （Windows快捷方式）, ln
+
+
+
+4.2 权限管理命令
+chmod -R(递归)
+r 4
+w 2
+x 1
+
+file         r; cat/more/less/head/tail
+             w; vim/add
+             x; script/command
+
+directory    r; ls
+             w; touch/rm/mkdir/rmdir
+             x; cd
+
+chmod       +-=/421 
+chown
+chgrp
+umask -S	
+umask {0}022   777-022=755 rwxr-xr-x
+
+
+
+4.3 文件搜索命令
+find /etc -name(-iname) * ?
+find /etc -size +n（大于） -n（小于） n（等于）  +204800（100MB）
+      -a [and] 两个条件同时满足
+      -o [or] 两个条件满足任意一个
+      -type f,d,l [文件，目录，软链接]
+      -inum 根据i节点查找
+find /home -user shenchao
+find /home -group teacher
+find /etc -cmin -5
+     -amin 访问时间 access
+     -cmin 文件属性 change
+     -mmin 文件内容 modify
+find /etc -name inittab -exec[ok] ls -l {} \;
+
+locate -i(不区分大小写) [everything on Windows] 需updatedb
+       /tmp中的文件不在locate范围
+
+内容搜索
+grep -i
+grep -v ^# (排除查找)
+
+命令搜索
+which      cp,useradd
+whereis    useradd
+
+
+
+
+4.4 帮助命令
+man [manual]
+man ls        查看ls命令的帮助信息 [whatis] --help
+man services  查看配置文件services的帮助信息[apropos]
+help [built-in]
+
+
+4.5 用户管理命令
+useradd
+passwd
+who
+w
+
+4.6 压缩解压命令
+
+gzip (.gz) ---> gunzip
+
+tar (.tar) -c[打包] -v[显示详细信息] -f[指定文件名] -z[打包同时压缩] ---> tar -x[解包]
+     .tar.gz     tar -zcf ---> tar -zxf  
+
+zip (.zip) -r(压缩目录) ---> unzip
+
+bzip2 (.bz2)  -k(文件) ---> bunzip2
+     .tar.bz2    tar -cjf ---> tar - xjf
+
+
+4.7 网络命令
+write
+wall (广播信息)
+ping （测试网络连通性） -c  ip
+ifconfig （查看和设置网卡信息） ip
+mail （查看发送电子邮件）
+last （列出目前与过去登录的信息）
+lastlog （检查某特定用户上次登录的时间） -u 502
+traceroute （显示数据包到主机间的路径）
+netstat （显示网络相关信息）
+          -t  TCP协议
+          -u  UDP协议
+          -l  监听
+          -r  路由
+          -n  显示ip地址和端口号
+       # netstat -tlun   查看本机监听的端口
+       # netstat -an     查看本机所有的网络连接
+       # netstat -rn     查看本机路由表
+
+setup （配置网络）
+mount （挂载） -t 文件系统（iso9660） /dev/sr0(cdrom)   /mnt/cdrom/(挂载点)
+
+
+4.8 关机重启命令
+shutdown
+        -c（取消前一个关机命令）
+        -h（关机）
+           # halt
+           # poweroff
+           # init 0
+        -r（重启）
+           # reboot
+           # init 6
+
+   系统运行级别：
+      0 ----> 关机 
+      1 ----> 单用户
+      2 ----> 不完全多用户，不含NFS服务
+      3 ----> 完全多用户
+      4 ----> 未分配
+      5 ----> 图形界面 
+      6 ----> 重启
+
+    #修改系统默认运行级别
+    id:3:initdefault:
+
+    #查询系统运行级别
+    runlevel； init 3
+
+logout  退出登录命令
+
+
+5. Vim
+
+Vi 
+
+
+a A
+i I          插入
+o O
+
+
+
+定位
+: set nu
+: set nonu  取消行号
+gg          第一行
+G           最后一行
+nG          到第n行
+: n         到第n行
+
+
+
+删除
+x         删除光标所在处  字符
+nx        删除光标所在处  后n个字符
+dd        删除光标所在行，ndd删除n行
+dG        删除光标所在行  到文件末尾内容
+D         删除光标所在处  到行尾内容
+:n1,n2d   删除指定范围的行
+
+
+
+复制和剪切
+yy        复制当前行
+nyy       复制当前行 以下n行
+dd        剪切当前行
+ndd       剪切当前行 以下n行
+p,P       粘贴在当前光标所在行下 或行上
+
+
+
+替换和恢复
+r/R
+u
+
+
+
+搜索和替换
+/string         搜索指定字符串
+                搜索时忽略大小写 :set ic
+n               搜索指定字符串的下一个出现位置
+:%s/old/new/g   全文替换指定字符串
+：n1,n2s/old/new/g  在一定范围内替换指定字符串
+
+
+
+保存退出
+:w                 保存修改
+:w new_filename    另存为指定文件
+:wq                保存修改          并退出
+ZZ                 快捷键，保存修改  并退出
+:q!                不保存修改        退出
+:wq!               保存修改          并退出（文件所有者及root可使用）
+
+
+
+Tips：
+
+:r /           导入文件内容
+:r !命令       导入命令执行结果
+
+
+
+6.1 软件包管理简介
+
+* 源码包 --> 脚本安装包
+      优点：
+           开源。可修改
+           自由选择功能
+           编译安装
+           卸载方便
+      缺点：
+           安装步骤较多，拼写错误
+           编译时间较长
+           报错难于解决
+
+* 二进制包（RPM包 Default包）
+        优点：
+           包管理系统简单
+           安装速递快
+        缺点：
+           看不到源代码
+           功能选择不够灵活
+           依赖性
+
+6.2 RPM包管理
+
+- rpm命令管理
+
+* 命名原则
+httpd-2.2.15-15.e16.centos.l.i686.rpm
+
+httpd      软件包名
+2.2.15     软件版本
+15         软件发布的次数
+e16.centos 适合的Linux平台
+i686       适合的硬件平台
+rpm        扩展名
+
+*依赖性
+树形依赖：a-->b-->c
+环形依赖：a-->b-->c-->a
+模块依赖：www.rpmfind.net
+
+包全名：操作的包是没有安装的软件包时，使用包全名。注意路径
+包名：  操作已经安装的软件包时，使用包名。搜索/var/lib/rpm中的数据库
+
+安装：rpm -ivh 包全名
+      -i(install)  安装
+      -v(verbose)  显示详细信息
+      -h(hash)     显示进度
+     --nodeps      不检测依赖性
+
+
+升级：rpm -Uvh     包全名 (Upgrade)
+卸载：rpm -e       包名 （erase）
+         --nodeps  不检查依赖性
+
+查询安装的包
+rpm -q   包名 （-q query 查询）
+rpm -qa      （-a  all 查询所有已经安装的rpm包） 
+rpm -qa | grep 包名
+
+查询软件包详细信息
+rpm -qi 包名 （-i information 信息）
+    -p  （查询未安装包信息 package）
+
+查询包中文件安装位置
+rpm -ql 包名 （-l list 列表）
+
+查询系统文件属于哪个包
+rpm -qf 系统文件名  （-f file 查询系统文件属于哪个软件包）
+
+查询软件包的依赖性
+rpm -qR 包名 （-R查询软件包的依赖性requires ）
+   （-p 查询未安装包信息package）
+
+
+
+★☆ RPM包校验 ☆★
+
+rpm -V 已安装的包名 （-V 校验指定rpm包中的文件verify）
+
+* S 文件大小是否改变
+* M 文件的类型或文件的权限是否改变
+* 5 文件MD5校验和是否改变（可判断文件内容是否改变）
+* D 设备的中，代码是否改变
+* L 文件的路径是否改变
+* U 文件的属主（所有者）是否改变
+* G 文件的属组是否改变
+* T 文件的修改时间是否改变
+
+
+文件类型：
+    c 配置文件 config file
+    d 普通文档 documentation
+    g 鬼文件  ghost file
+    l 授权文件 license file
+    r 描述文件 read me
+
+
+★☆ RPM包中文件提取 ☆★
+
+rpm2cpio 包全名 |\
+cpio -idv .文件绝对路径
+
+
+rpm2cpio 将rpm包转换为cpio格式的命令
+cpio  标准工具，用于创建软件档案文件和从档案文件中提取文件
+cpio 选项 <[文件|设备]
+    -i: copy-in模式 还原
+    -d：还原时自动新建目录
+    -v：显示还原过程
+
+{ls命令演示}
+rpm2cpio /mnt/cdrom/Packages/coreutils-8.4-19.el6.i686.rpm |cpio -idv ./bin/ls
+
+
+
+6.3 yum在线管理（Redhat售后，收费）
+
+ 1.> IP地址配置
+     #setup工具
+     # vi /etc/sysconfig/network-scripts/ifcfg-eth0
+        ONBOOT = "yes"
+
+     #service network restart
+
+  2.> 网络yum源
+    #vi /etc/yum/repos.d/CentOS-Base.repo
+    
+    [base]  容器名称，一定要放在[]中
+     name   容器说明，可以自己随便写
+    mirrorlist   镜像站点，这个可以注释掉
+    baseurl     我们的yum源服务器的地址。默认为CentOS官方的yum源服务器，是可以用的。
+    enabled   此容器是否生效，如果不写或写成enable=1 都是生效的。enabled=0为无效
+    gpgcheck  如果是1，指RPM的数字证书生效，如果是0则不生效
+    gpgkey    数字证书的公钥文件保存位置。不用修改
+ 
+
+
+
+6.4 源码包管理
+
+  1.> 源码包和rpm包的区别
+      概念、安装位置
+
+RPM默认安装位置：
+      /etc/  配置文件
+      /usr/bin/  可执行命令
+      /usr/lib/  函数库
+      /usr/share/doc  基本的软件使用手册
+      /usr/share/man  帮助文件
+
+源码包安装位置：
+       /usr/local/软件名/
+
+位置不同，带来的服务命令不同：service
+  
+   2.> 源码包安装过程
+
+  源代码：/usr/local/src/
+软件安装: /usr/local/
+安装报错：a.安装过程停止 b.并出现erro、warning、no的提示
+
+WinSCP 远程工具
+
+./configure  软件配置与检查
+  a.定义功能选项
+  b.检测系统环境
+  c.把ab的信息写入Makefile文件，用于后续编辑
+  ./configure --prefix=usr/local/apache2
+   make  编译 ---> 如果出错 make clean
+   make install  编译安装
+
+
+6.4 脚本安装包
+
+setup.sh
+
+webmin安装演示，跟Windows安装程序很相似
+
+mount -t cifs -o username=Bob,password=123456 //192.168.0.102/Share /usr/local/bin/code
+
+在浏览器中输入http://ip:10000或本地 http://localhost:10000/ 
+
+如果打不开看下一步
+
+如果访问不了，就是iptables 阻止端口了
+
+添加端口允许
+
+指令： /sbin/iptables -I INPUT -p tcp --dport 10000 -j ACCEPT
+
+（如果需要其他端口只需修改10000就可以） 
+
+保存修改
+
+指令：/etc/rc.d/init.d/iptables save
+
+此时再次访问
+
+在浏览器中输入http://ip:10000或 http://localhost:10000/ 
+
+既可以看到如图界面
+
+
+
+7. 用户和用户组
+   用户配置文件
+
+ 合理的用户权限等级制度和服务器操作规范
+  查看和修改用户信息---->用户配置文件
+
+ 用户信息文件 /etc/passwd 
+  1字段：用户名称
+  2字段：密码标志
+  3字段：UID（用户ID）
+         0：超级用户    1-499：系统用户（伪用户）   500-65535：普通用户
+  4字段：GID（用户初始组ID）
+         初始组：每个用户的初始组只能有一个，不能修改！！
+         附加组：用户可以加入其他的用户组，可以有多个
+  5字段：用户说明，备注
+  6字段：家目录
+         普通用户：/home/用户名/
+         超级用户：/root/
+  7字段：登录之后的Shell
+         Shell是Linux的命令解释器
+         在/etc/passwd当中，除了标准Shell是/bin/bash之外，还可以写如/sbin/nologin
+
+  影子文件 /etc/shadow
+   1字段：用户名
+   2字段：加密密码
+        算法由MD5升级为SHA512散列加密算法
+        如果密码位是“!!”或“*”代表没有密码，不能登录
+   3字段：密码最后一次修改时间
+          linux时间戳 1970年1月1日标准时间 +天数
+   4字段：两次修改密码时间间隔（与3字段相比）
+   5字段：密码有效期（与3字段相比）
+   6字段：密码修改到期前的警告天数（与5字段相比）
+   7字段：密码过期后的宽限天数（与5字段相比）
+          0：密码过期后立即失效
+          -1：密码永远不会失效
+   8字段：账号失效时间
+          用时间戳表示 
+          时间戳--->日期   date d "1970-01-01 16066 days"
+          日期---->时间戳  echo $(($(date --date="2014/01/06"+%s)/86400+1))
+   9字段：保留
+
+   组信息文件 /etc/group | 组密码文件 /etc/gshadow
+   1字段：组名               组名
+   2字段：组密码标志         组密码
+   3字段：GID                组管理员用户名
+   4字段：组中附加用户       组中附加用户
+
+
+**用户管理相关文件
+
+用户的家目录：
+    普通用户：/home/用户名/   所有者和所属组为此用户，权限为700
+    root用户：/root/     所有者和所属组为root用户，权限是550
+
+用户的邮箱
+    /var/spool/mail/用户名/
+
+
+用户模板目录
+    /etc/skel/
+
+
+
+**用户管理命令
+
+  useradd vpasswdv usermod  chage  userdel   su
+
+$$$ useradd [选项] 用户名
+  
+ -u  UID     手工指定用户的UID号
+ -d 家目录   手工指定用户的家目录
+ -c 用户说明  手工指定用户的说明
+ -g 组名      手工指定用户的初始组
+ -G 组名      指定用户的附加组  
+ -s shell     手工指定用户的登录shell。默认为/bin/bash
+
+
+# useradd sc
+# grep sc /etc/passwd
+# grep sc /etc/shadow
+# grep sc /etc/group
+# grep sc /etc/gshadow
+------------
+# ll -d /home/sc/
+# ll /var/spool/mail/sc
+
+
+指定选项添加用户
+useradd -u 666 -G root,bin -d /home/lamp1 \
+-c "test user" -s /bin/bash sc
+
+
+用户默认值文件
+/etc/default/useradd
+GROUP=100     #用户默认组
+HOME=/home    #用户家目录
+INACTIVE=-1   #密码过期宽限天数（shadow文件字段7）
+EXPIRE=       #密码失效时间（shadow文件字段8）
+SHELL=/bin/bash #默认shell
+SKEL=/etc/skel  #模板目录
+CREATE_MAIL_SPOOL=yes   #是否建立邮箱
+
+/etc/login.defs
+PASS_MAX_DAYS 99999  #密码有效期（字段5）
+PASS_MIN_DAYS 0      #密码修改间隔（字段4）
+PASS_MIN_LEN 5       #密码最小5位（PAM）
+PASS_WARN_AGE 7      #密码到期警告（字段6）
+UID_MIN  500         #最小和最大UID范围
+GID_MAX  60000
+ENCRYPT_METHOD  SHA512 #加密模式
+
+
+
+
+修改用户密码
+$$$ passwd [选项] 用户名
+
+  -S       查询用户密码的状态。仅root用户可用
+  -l       暂时锁定用户。仅root用户可用
+  -u       解锁用户。仅root用户可用
+ --stdin   通过管道符输出的数据作为用户的密码
+
+
+
+
+修改用户信息
+$$$ usermod [选项] 用户名 {与useradd不同的是，usermod标的是已存在的用户}
+ 
+ -u  UID      修改用户的UID号
+ -c 用户说明  修改用户的说明
+ -g 组名      修改用户的初始组（不推荐，会搞晕的+_+）
+ -G 组名      修改用户的附加组  
+ -L           临时锁定用户
+ -U           解锁用户
+
+	 
+
+
+修改用户密码状态
+$$$ chage [选项] 用户名
+
+ -l       列出用户的详细密码状态
+ -d 日期  修改密码最后一次更改日期（字段3）
+ -m 天数  两次密码修改间隔（字段4）
+ -M 天数  密码有限期（字段5）
+ -W 天数  密码过期前警告天数（字段6）
+ -I 天数  密码过后宽限天数（字段7）
+ -E 日期  账号失效时间（字段8）
+
+ # chage -d 0 lamp
+ # 这个命令把密码修改日期归零（字段3），这样用户每次登陆就要求修改密码
+
+
+
+
+删除用户userdel | 用户切换命令su
+$$$ userdel [-r] 用户名
+
+-r  删除用户的同时，删除用户家目录
+
+也可手工删除！！通过以下的方式：
+ vi /etc/passwd
+ vi /etc/shadow
+ vi /etc/group
+ vi /etc/gshadow
+ rm -rf /var/spool/mail/lamp
+ rm -rf /home/lamp
+ skel （模板..）
+
+
+$$$ 查看用户ID
+id 用户名
+
+
+$$$ 切换用户身份su
+su [选项] 用户名
+ -： 选项只使用“-”代表连带用户的环境变量一起切换
+-c:  仅执行一次命令，不切换用户身份
+su - root;
+su - root -c "useradd user3";
+
+
+
+7.4 用户组管理
+**添加用户组
+# groupadd [选项] 组名
+  -g GID   指定组ID
+
+**修改用户组
+# groupmod [选项] 组名
+  -g GID      修改组ID
+  -n 新组名   修改组名
+
+#groupmod -n testgrp group1
+ 把组名group1修改为testgrp
+
+
+**删除用户组
+# groupdel 组名
+（其中组中不能有初始化的用户）
+
+
+**把用户添加入组或从组中删除
+# gpasswd 选项 组名
+  -a 用户名   把用户加入组
+  -d 用户名   把用户从组中删除
+
+
+
+
+8.1 ACL权限
+
+**查看分区ACL权限是否开启
+# dumpe2fs -h /dev/sda3
+# dumpe2fs命令是查询指定分区详细文件系统信息的命令
+
+选项： -h 仅显示超级块中信息，而不显示磁盘块组的详细信息
+
+
+**临时开启分区ACL权限
+# mount -o remount,acl/
+# 重新挂载根分区，并挂载加入acl权限
+
+
+**永久开启分区ACL权限
+# vi /etc/fstab
+UUID=c2ca6    default,acl 
+# 加入acl
+
+# mount -o remount/
+# 重新挂载文件系统或重启系统，使修改生效
+
+
+
+**查看ACL命令
+# getfacle 文件名
+# 查看ACL权限
+
+
+
+**设定ACL权限的命令
+# setfacl 选项 文件名
+  -m  设定acl权限
+  -x  删除指定的ACL权限
+  -b	删除所有的ACL权限
+  -d	设定默认ACL权限
+  -k	删除默认ACL权限
+  -R	递归设定ACL权限
+
+# setfacl -m u:st:rx /project/
+
+
+**给用户组设定acl权限
+# groupadd tgroup2
+# setfacl -m g:tgroup2:rwx project/
+为组tgroup2分配ACL权限。
+
+
+
+**最大有效权限与删除ACL权限
+
+mask是用来指定最大有效权限的。“相与”
+
+setfacl -m m:rx /project/
+
+通过mask权限设置来决定ACL权限和所属组权限；但不能更改所有者的权限
+
+
+**删除ACL权限
+# setfacl -x u:用户名 文件名
+# 删除指定用户的ACL权限
+
+# setfacl -x g:组名 文件名
+# 删除指定用户组的ACL权限
+
+
+# setfacl -b 文件名
+# 删除文件的所有ACL权限
+
+
+
+**递归ACL权限 ----> 目录
+# setfacl -m u:用户名:权限 -R 文件名 【针对现有文件】
+
+# 默认ACL权限 ----> 目录
+# setfacl -m d:u用户名:权限 文件名 【针对未来新文件】
+
+
+
+8.2 文件特殊权限
+
+SetUID   SetGID  Sticky BIT
+所有者    所属组     其他
+
+*** SetUID
+可执行的二进制程序；命令执行者需要有x权限
+获得该程序文件属主的身份；只在该程序执行过程中有效
+
+passwd有权限  cat没有权限
+
+
+* 设定SetUID的方法
+4代表SUID
+ chmod 4755 文件名
+ chmod u+s 文件名
+
+* 取消SetUID方法
+ chmod 755 文件名
+ chmod u-s 文件名
+
+
+* 危险的SetUID
+关键目录应严格控制写权限。比如“/” “/usr”
+用户的密码设置要严格遵守密码三原则
+对系统中默认应该具有SetUID权限的文件作一列表，定时检查有没有这之外的文件被设置了SetUID权限
+
+
+*** SetGID
+可执行的二进制程序；命令执行者需要有x权限
+获得组身份文件属组；目录
+
+usr/bin/locate
+
+slocate组名
+
+mlocate.db
+
+2代表SGID
+chmod 2755 文件名
+chmod g+s 文件名
+
+
+7755 无意义
+
+*** SBIT粘着位作用
+针对目录；普通用户对目录有w和x权限；
+只能删除自己建立的文件
+
+/tmp/
+
+* 设置粘着位
+chmod 1755 目录名
+chmod o+t 目录名
+
+取消粘着位
+chmod 777  目录名
+chmod o-t  目录名
+
+
